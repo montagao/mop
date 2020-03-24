@@ -4,7 +4,7 @@
 
 package mop
 
-import `github.com/nsf/termbox-go`
+import "github.com/nsf/termbox-go"
 
 // ColumnEditor handles column sort order. When activated it highlights
 // current column name in the header, then waits for arrow keys (choose
@@ -40,14 +40,22 @@ func (editor *ColumnEditor) Handle(event termbox.Event) bool {
 	case termbox.KeyEsc:
 		return editor.done()
 
-	case termbox.KeyEnter:
-		editor.execute()
+		//	case termbox.KeyArrowLeft:
+		//		editor.selectLeftColumn()
+		//
+		//	case termbox.KeyArrowRight:
+		//		editor.selectRightColumn()
+	}
 
-	case termbox.KeyArrowLeft:
+	switch event.Ch {
+	case 'h':
 		editor.selectLeftColumn()
-
-	case termbox.KeyArrowRight:
+	case 'l':
 		editor.selectRightColumn()
+	case 'j':
+		editor.execute()
+	case 'k':
+		editor.execute()
 	}
 
 	return false

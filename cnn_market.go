@@ -5,12 +5,12 @@
 package mop
 
 import (
-	`bytes`
-	`fmt`
-	`io/ioutil`
-	`net/http`
-	`regexp`
-	`strings`
+	"bytes"
+	"fmt"
+	"io/ioutil"
+	"net/http"
+	"regexp"
+	"strings"
 )
 
 const marketURL = `https://money.cnn.com/data/markets/`
@@ -30,6 +30,7 @@ type Market struct {
 	Oil       map[string]string
 	Yen       map[string]string
 	Euro      map[string]string
+	Cad       map[string]string
 	Gold      map[string]string
 	regex     *regexp.Regexp // Regex to parse market data from HTML.
 	errors    string         // Error(s), if any.
@@ -52,6 +53,7 @@ func NewMarket() *Market {
 	market.Oil = make(map[string]string)
 	market.Yen = make(map[string]string)
 	market.Euro = make(map[string]string)
+	market.Cad = make(map[string]string)
 	market.Gold = make(map[string]string)
 
 	market.errors = ``
@@ -60,6 +62,7 @@ func NewMarket() *Market {
 	const change = `>([\+\-]?[\d\.,]+)<\/span>`
 	const price = `>([\d\.,]+)<\/span>`
 	const percent = `>([\+\-]?[\d\.,]+%?)<`
+	const currency = `>?(\$\d\.\d{2})<\/span>`
 
 	rules := []string{
 		`>Dow<`, any, percent, any, price, any, change, any,
@@ -74,6 +77,7 @@ func NewMarket() *Market {
 		`>Hang Seng<`, any, percent, any, price, any, change, any,
 		`>FTSE 100<`, any, percent, any, price, any, change, any,
 		`>DAX<`, any, percent, any, price, any, change, any,
+		`>Canadian Dollar<`, any, currency, any,
 	}
 
 	market.regex = regexp.MustCompile(strings.Join(rules, ``))
@@ -103,6 +107,7 @@ func (market *Market) Fetch() (self *Market) {
 	}
 
 	body = market.isMarketOpen(body)
+
 	return market.extract(market.trim(body))
 }
 
@@ -121,7 +126,7 @@ func (market *Market) isMarketOpen(body []byte) []byte {
 //-----------------------------------------------------------------------------
 func (market *Market) trim(body []byte) []byte {
 	start := bytes.Index(body, []byte(`Markets Overview`))
-	finish := bytes.LastIndex(body, []byte(`Gainers`))
+	finish := bytes.LastIndex(body, []byte(`Openfolio`))
 	snippet := bytes.Replace(body[start:finish], []byte{'\n'}, []byte{}, -1)
 	snippet = bytes.Replace(snippet, []byte(`&amp;`), []byte{'&'}, -1)
 
@@ -147,7 +152,6 @@ func (market *Market) extract(snippet []byte) *Market {
 	market.Sp500[`change`] = matches[7]
 	market.Sp500[`latest`] = matches[8]
 	market.Sp500[`percent`] = matches[9]
-
 
 	market.Yield[`name`] = `10-year Yield`
 	market.Yield[`latest`] = matches[10]
@@ -181,5 +185,7 @@ func (market *Market) extract(snippet []byte) *Market {
 	market.Frankfurt[`latest`] = matches[30]
 	market.Frankfurt[`percent`] = matches[31]
 
+	market.Cad[`latest`] = matches[32]
+	market.Cad[`change`] = `idk lol`
 	return market
 }

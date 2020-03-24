@@ -5,9 +5,9 @@
 package mop
 
 import (
-	`sort`
-	`strconv`
-	`strings`
+	"sort"
+	"strconv"
+	"strings"
 )
 
 // Sorter gets called to sort stock quotes by one of the columns. The
@@ -26,6 +26,9 @@ type byTickerAsc struct{ sortable }
 type byLastTradeAsc struct{ sortable }
 type byChangeAsc struct{ sortable }
 type byChangePctAsc struct{ sortable }
+type byAfterHoursLastTradeAsc struct{ sortable }
+type byAfterHoursChangeAsc struct{ sortable }
+type byAfterHoursChangePctAsc struct{ sortable }
 type byOpenAsc struct{ sortable }
 type byLowAsc struct{ sortable }
 type byHighAsc struct{ sortable }
@@ -42,6 +45,9 @@ type byTickerDesc struct{ sortable }
 type byLastTradeDesc struct{ sortable }
 type byChangeDesc struct{ sortable }
 type byChangePctDesc struct{ sortable }
+type byAfterHoursLastTradeDesc struct{ sortable }
+type byAfterHoursChangeDesc struct{ sortable }
+type byAfterHoursChangePctDesc struct{ sortable }
 type byOpenDesc struct{ sortable }
 type byLowDesc struct{ sortable }
 type byHighDesc struct{ sortable }
@@ -66,6 +72,17 @@ func (list byChangeAsc) Less(i, j int) bool {
 func (list byChangePctAsc) Less(i, j int) bool {
 	return c(list.sortable[i].ChangePct) < c(list.sortable[j].ChangePct)
 }
+
+func (list byAfterHoursLastTradeAsc) Less(i, j int) bool {
+	return list.sortable[i].AfterHoursPrice < list.sortable[j].AfterHoursPrice
+}
+func (list byAfterHoursChangeAsc) Less(i, j int) bool {
+	return c(list.sortable[i].AfterHoursChange) < c(list.sortable[j].AfterHoursChange)
+}
+func (list byAfterHoursChangePctAsc) Less(i, j int) bool {
+	return c(list.sortable[i].AfterHoursChangePct) < c(list.sortable[j].AfterHoursChangePct)
+}
+
 func (list byOpenAsc) Less(i, j int) bool {
 	return list.sortable[i].Open < list.sortable[j].Open
 }
@@ -109,6 +126,15 @@ func (list byChangeDesc) Less(i, j int) bool {
 }
 func (list byChangePctDesc) Less(i, j int) bool {
 	return c(list.sortable[j].ChangePct) < c(list.sortable[i].ChangePct)
+}
+func (list byAfterHoursLastTradeDesc) Less(i, j int) bool {
+	return list.sortable[j].AfterHoursPrice < list.sortable[i].AfterHoursPrice
+}
+func (list byAfterHoursChangeDesc) Less(i, j int) bool {
+	return c(list.sortable[j].AfterHoursChange) < c(list.sortable[i].AfterHoursChange)
+}
+func (list byAfterHoursChangePctDesc) Less(i, j int) bool {
+	return c(list.sortable[j].AfterHoursChangePct) < c(list.sortable[i].AfterHoursChangePct)
 }
 func (list byOpenDesc) Less(i, j int) bool {
 	return list.sortable[j].Open < list.sortable[i].Open
@@ -160,6 +186,9 @@ func (sorter *Sorter) SortByCurrentColumn(stocks []Stock) *Sorter {
 			byLastTradeAsc{stocks},
 			byChangeAsc{stocks},
 			byChangePctAsc{stocks},
+			byAfterHoursLastTradeAsc{stocks},
+			byAfterHoursChangeAsc{stocks},
+			byAfterHoursChangePctAsc{stocks},
 			byOpenAsc{stocks},
 			byLowAsc{stocks},
 			byHighAsc{stocks},
@@ -178,6 +207,9 @@ func (sorter *Sorter) SortByCurrentColumn(stocks []Stock) *Sorter {
 			byLastTradeDesc{stocks},
 			byChangeDesc{stocks},
 			byChangePctDesc{stocks},
+			byAfterHoursLastTradeDesc{stocks},
+			byAfterHoursChangeDesc{stocks},
+			byAfterHoursChangePctDesc{stocks},
 			byOpenDesc{stocks},
 			byLowDesc{stocks},
 			byHighDesc{stocks},
